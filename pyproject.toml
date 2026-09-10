@@ -1,0 +1,25 @@
+[project]
+name = "future50"
+version = "0.1.0"
+description = "FUTURE-50 Autonomous Local Personal AI Operating System"
+readme = "README.md"
+requires-python = ">=3.10"
+authors = [
+  { name = "FUTURE-50 Team" }
+]
+license = { text = "MIT" }
+classifiers = [
+  "Programming Language :: Python :: 3",
+  "License :: OSI Approved :: MIT License",
+  "Operating System :: OS Independent",
+]
+
+[project.scripts]
+future50 = "future50.__main__:main"
+
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+packages = ["future50"]
