@@ -12,4 +12,4 @@ services:
       - key: F50_MODEL_API_KEY
         sync: false
       - key: F50_MODEL_NAME
-        value: deepseek-ai/deepseek-v4-flash-0731
+        value: google/gemma-4-31b-it

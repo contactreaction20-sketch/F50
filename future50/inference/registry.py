@@ -5,6 +5,7 @@ available installed Ollama local models used by the current project.
 """
 
 from dataclasses import dataclass
+import os
 from typing import Optional
 
 
@@ -28,50 +29,20 @@ class ModelRegistry:
     """Static local registry for installed and selectable model profiles."""
 
     def __init__(self):
-        self.profiles = [
-            ModelProfile(
-                name="qwen2.5:7b-instruct-q4_K_M",
-                family="qwen2.5",
-                backend="ollama",
-                format="gguf",
-                quantization="q4_K_M",
-                parameters="7B",
-                context_length=8192,
-                capabilities=("chat", "coding", "reasoning"),
-                ram_requirement="4GB",
-                vram_requirement="0GB",
-                status="installed",
-                active=True,
-            ),
-            ModelProfile(
-                name="qwen2.5-coder:7b",
-                family="qwen2.5-coder",
-                backend="ollama",
-                format="gguf",
-                quantization="q4_K_M",
-                parameters="7B",
-                context_length=8192,
-                capabilities=("chat", "coding"),
-                ram_requirement="4GB",
-                vram_requirement="0GB",
-                status="installed",
-                active=False,
-            ),
-            ModelProfile(
-                name="llama3:latest",
-                family="llama3",
-                backend="ollama",
-                format="gguf",
-                quantization="unknown",
-                parameters="8B",
-                context_length=8192,
-                capabilities=("chat", "reasoning"),
-                ram_requirement="4GB",
-                vram_requirement="0GB",
-                status="installed",
-                active=False,
-            ),
-        ]
+        self.profiles = [ModelProfile(
+            name=os.getenv("F50_MODEL_NAME", "google/gemma-4-31b-it"),
+            family="NVIDIA-hosted",
+            backend="nvidia",
+            format="API",
+            quantization="managed",
+            parameters="31B",
+            context_length=32768,
+            capabilities=("chat", "coding", "reasoning"),
+            ram_requirement="0GB",
+            vram_requirement="0GB",
+            status="configured",
+            active=True,
+        )]
 
     def list_models(self) -> list[ModelProfile]:
         return list(self.profiles)

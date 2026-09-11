@@ -32,13 +32,13 @@ def test_local_model_infer_reports_provider_failure_cleanly_without_route_fallba
 
 
 def test_provider_builds_same_language_system_instruction_for_hindi_prompt():
-    provider = LocalOllamaProvider(model="qwen2.5:7b-instruct-q4_K_M")
+    provider = LocalOllamaProvider(model="google/gemma-4-31b-it")
     instruction = provider._same_language_instruction("namaste, aap kaise ho?")
     assert "Hindi" in instruction or "Hinglish" in instruction or "same language" in instruction.lower()
 
 
 def test_local_model_infer_passes_same_language_system_prompt(monkeypatch):
-    provider = LocalOllamaProvider(model="qwen2.5:7b-instruct-q4_K_M")
+    provider = LocalOllamaProvider(model="google/gemma-4-31b-it")
     calls = {}
 
     def fake_generate(prompt, model=None, system=None):

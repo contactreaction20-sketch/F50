@@ -29,7 +29,7 @@ class ModelProvider:
     def load(self) -> bool:
         raise NotImplementedError
 
-    def generate(self, prompt: str, model: str = "qwen2.5:7b-instruct-q4_K_M") -> str:
+    def generate(self, prompt: str, model: str = "google/gemma-4-31b-it") -> str:
         raise NotImplementedError
 
     def health_check(self) -> dict[str, Any]:
@@ -43,12 +43,12 @@ class LocalOllamaProvider(ModelProvider):
     already present in the system registry.
     """
 
-    def __init__(self, model: str = "qwen2.5:7b-instruct-q4_K_M"):
+    def __init__(self, model: str = "google/gemma-4-31b-it"):
         self.model = model
         self.client = ollama.Client() if ollama is not None else None
-        self.remote_url = os.getenv("F50_MODEL_API_URL", "").rstrip("/")
+        self.remote_url = os.getenv("F50_MODEL_API_URL", "https://integrate.api.nvidia.com/v1").rstrip("/")
         self.remote_key = os.getenv("F50_MODEL_API_KEY", "")
-        self.remote_model = os.getenv("F50_MODEL_NAME", model)
+        self.remote_model = os.getenv("F50_MODEL_NAME", "google/gemma-4-31b-it")
 
     def load(self) -> bool:
         if self.remote_url:

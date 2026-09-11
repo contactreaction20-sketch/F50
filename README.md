@@ -85,7 +85,7 @@ an Ollama server and model available to the service.
 
 The default Blueprint target is NVIDIA's OpenAI-compatible API. Add a newly
 rotated NVIDIA API key as `F50_MODEL_API_KEY` in Render. The default model is
-`deepseek-ai/deepseek-v4-flash-0731`; change `F50_MODEL_NAME` to another model
+`google/gemma-4-31b-it`; change `F50_MODEL_NAME` to another model
 available to your NVIDIA account when needed. Never commit API keys to Git or
 paste them into chat, issues, or public logs. Model provider safety controls
 remain enabled by design.
