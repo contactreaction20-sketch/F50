@@ -54,7 +54,7 @@ def test_local_model_infer_passes_same_language_system_prompt(monkeypatch):
 
     assert reply == "Namaste, aap kaise hain?"
     assert calls['prompt'] == "namaste, aap kaise ho?"
-    assert calls['model'] == "qwen2.5:7b-instruct-q4_K_M"
+    assert calls['model'] == "future50-coding"
     assert calls['system'] and "same language" in calls['system'].lower()
 
 

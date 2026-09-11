@@ -19,6 +19,12 @@ from ..research.local_rag import LocalKnowledgeRAG
 
 
 STATIC_ROOT = Path(__file__).with_name("static")
+MAX_BODY_BYTES = 64 * 1024
+
+
+def _provider_error(reply: str) -> bool:
+    lowered = reply.lower()
+    return "provider is unavailable" in lowered or "provider inference failed" in lowered or "provider unavailable" in lowered
 
 
 class ChatWebHandler(BaseHTTPRequestHandler):
@@ -48,7 +54,8 @@ class ChatWebHandler(BaseHTTPRequestHandler):
                 content_type = mimetypes.guess_type(file_path.name)[0] or "application/octet-stream"
                 return self._serve_file(file_path, content_type)
         if path == "/api/health":
-            return self._json({"ok": True, "service": "future50-web"})
+            provider = model_provider.health_check()
+            return self._json({"ok": True, "service": "future50-web", "inference": provider})
         self.send_error(404)
 
     def do_POST(self):
@@ -60,6 +67,8 @@ class ChatWebHandler(BaseHTTPRequestHandler):
             return
         try:
             length = int(self.headers.get("Content-Length", "0"))
+            if length <= 0 or length > MAX_BODY_BYTES:
+                return self._json({"error": "Request body must be between 1 and 65536 bytes."}, status=413)
             payload = json.loads(self.rfile.read(length) or b"{}")
             message = str(payload.get("message", "")).strip()
             session_id = str(payload.get("session_id", "default"))[:120]
@@ -70,8 +79,12 @@ class ChatWebHandler(BaseHTTPRequestHandler):
             snapshot = self.context_manager.snapshot(session_id, message)
             prompt = "\n\n".join(part for part in (snapshot.prompt(), self._knowledge_context(message, snapshot.intent)) if part)
             response = self.chat.generate("user", prompt, model=model)
-            self.context_manager.remember(session_id, "user", message, importance=0.8)
-            self.context_manager.remember(session_id, "assistant", response.text, importance=0.7)
+            if _provider_error(response.text):
+                return self._json({"error": response.text}, status=503)
+            self.context_manager.remember_many(session_id, [
+                ("user", message, 0.8),
+                ("assistant", response.text, 0.7),
+            ])
             return self._json({
                 "reply": response.text,
                 "model": model.name,
@@ -81,12 +94,18 @@ class ChatWebHandler(BaseHTTPRequestHandler):
                 "intent": snapshot.intent,
                 "context_confidence": snapshot.confidence,
             })
+        except json.JSONDecodeError:
+            return self._json({"error": "Request body must be valid JSON."}, status=400)
         except Exception as exc:
+            if _provider_error(str(exc)):
+                return self._json({"error": str(exc)}, status=503)
             return self._json({"error": f"Local inference failed: {exc}"}, status=500)
 
     def _stream_chat(self):
         try:
             length = int(self.headers.get("Content-Length", "0"))
+            if length <= 0 or length > MAX_BODY_BYTES:
+                return self._json({"error": "Request body must be between 1 and 65536 bytes."}, status=413)
             payload = json.loads(self.rfile.read(length) or b"{}")
             message = str(payload.get("message", "")).strip()
             session_id = str(payload.get("session_id", "default"))[:120]
@@ -111,10 +130,14 @@ class ChatWebHandler(BaseHTTPRequestHandler):
                 response_parts.append(token)
                 self.wfile.write(f"data: {json.dumps({'token': token})}\n\n".encode("utf-8"))
                 self.wfile.flush()
-            self.context_manager.remember(session_id, "user", message, importance=0.8)
-            self.context_manager.remember(session_id, "assistant", "".join(response_parts), importance=0.7)
+            self.context_manager.remember_many(session_id, [
+                ("user", message, 0.8),
+                ("assistant", "".join(response_parts), 0.7),
+            ])
             self.wfile.write(b"data: {\"done\": true}\n\n")
             self.wfile.flush()
+        except json.JSONDecodeError:
+            return self._json({"error": "Request body must be valid JSON."}, status=400)
         except (BrokenPipeError, ConnectionResetError):
             return
         except Exception as exc:

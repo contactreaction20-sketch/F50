@@ -76,3 +76,9 @@ The service health endpoint is:
 ```text
 /api/health
 ```
+
+For cloud inference, configure an OpenAI-compatible provider in Render:
+`F50_MODEL_API_URL` should be the provider base URL (for example, an endpoint
+ending in `/v1`), `F50_MODEL_API_KEY` is its secret key, and `F50_MODEL_NAME`
+is the provider's model name. Without these variables, cloud deployments need
+an Ollama server and model available to the service.

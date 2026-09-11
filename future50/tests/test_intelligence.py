@@ -30,6 +30,19 @@ def test_context_handles_long_conversation_and_follow_up_reference(tmp_path):
     assert "Aurora dashboard" in snapshot.references["active_task"]
 
 
+def test_context_can_persist_multiple_turns_with_one_batch(tmp_path):
+    manager = ContextManager(root=tmp_path)
+
+    turns = manager.remember_many(
+        "session",
+        [("user", "Remember Aurora", 0.8), ("assistant", "I will remember Aurora", 0.7)],
+    )
+
+    assert len(turns) == 2
+    assert len(manager.sessions["session"]) == 2
+    assert ContextManager(root=tmp_path).sessions["session"][0].text == "Remember Aurora"
+
+
 def test_multi_agent_team_selects_specialist_lanes():
     team = MultiAgentTeam()
     assert team.plan("debug this Python test").lane == "coding"

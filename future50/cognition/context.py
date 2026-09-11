@@ -105,6 +105,24 @@ class ContextManager:
             self.save()
         return turn
 
+    def remember_many(self, session_id: str, entries: list[tuple[str, str, float]]) -> list[ContextTurn]:
+        """Append several turns with one persistence write."""
+        with self.lock:
+            turns = self.sessions.setdefault(session_id, [])
+            added = [
+                ContextTurn(
+                    role=role,
+                    text=text.strip(),
+                    importance=max(0.0, min(1.0, importance)),
+                    topic=self.topic(text),
+                )
+                for role, text, importance in entries
+            ]
+            turns.extend(added)
+            self.sessions[session_id] = turns[-self.max_turns:]
+            self.save()
+            return added
+
     def snapshot(self, session_id: str, message: str) -> ContextSnapshot:
         with self.lock:
             turns = list(self.sessions.get(session_id, []))

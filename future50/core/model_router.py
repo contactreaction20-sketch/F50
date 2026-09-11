@@ -36,11 +36,11 @@ class LocalModel:
         try:
             reply = model_provider.generate(
                 clean_prompt,
-                model="qwen2.5:7b-instruct-q4_K_M",
+                model=self.name,
                 system=system_instruction,
             )
         except TypeError:
-            reply = model_provider.generate(clean_prompt, model="qwen2.5:7b-instruct-q4_K_M")
+            reply = model_provider.generate(clean_prompt, model=self.name)
 
         if reply.startswith("Local model inference failed:") or "Local model provider is unavailable" in reply:
             return reply
