@@ -83,7 +83,9 @@ ending in `/v1`), `F50_MODEL_API_KEY` is its secret key, and `F50_MODEL_NAME`
 is the provider's model name. Without these variables, cloud deployments need
 an Ollama server and model available to the service.
 
-The default Blueprint target is OpenRouter's free Qwen3 32B route. Add an
-OpenRouter API key as `F50_MODEL_API_KEY` in Render; free routes can be
-rate-limited or temporarily unavailable, so they are suitable for testing and
-light use rather than guaranteed production capacity.
+The default Blueprint target is NVIDIA's OpenAI-compatible API. Add a newly
+rotated NVIDIA API key as `F50_MODEL_API_KEY` in Render. The default model is
+`deepseek-ai/deepseek-v4-flash-0731`; change `F50_MODEL_NAME` to another model
+available to your NVIDIA account when needed. Never commit API keys to Git or
+paste them into chat, issues, or public logs. Model provider safety controls
+remain enabled by design.
