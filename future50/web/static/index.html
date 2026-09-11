@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>FUTURE-50 | Intelligence workspace</title>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+  <div class="ambient ambient-one"></div>
+  <div class="ambient ambient-two"></div>
+  <main class="app-shell">
+    <aside class="sidebar">
+      <div class="brand"><span class="brand-mark">F</span><span>FUTURE-50</span></div>
+      <button class="new-chat" id="newChat"><span>+</span> New chat</button>
+      <p class="eyebrow">Workspace</p>
+      <nav>
+        <button class="nav-item active" data-space="chat"><span>◌</span> Chat</button>
+        <button class="nav-item" data-space="workspace"><span>□</span> Workspace</button>
+        <button class="nav-item" data-space="tasks"><span>✓</span> Tasks</button>
+        <button class="nav-item" data-space="memory"><span>◈</span> Memory</button>
+      </nav>
+      <div class="sidebar-bottom">
+        <p class="eyebrow">Local model</p>
+        <select id="modelSelect" class="dark-select">
+          <option value="future50-router">FUTURE-50 Router</option>
+          <option value="future50-coding">Coding route</option>
+          <option value="future50-research">Research route</option>
+        </select>
+        <div class="session"><span class="online-dot"></span><span>Local session</span><span class="session-state">Online</span></div>
+      </div>
+    </aside>
+
+    <section class="workspace">
+      <header class="topbar">
+        <div>
+          <p class="eyebrow">Private local workspace</p>
+          <h1>Chat</h1>
+        </div>
+        <div class="top-actions">
+          <button class="icon-button" id="bookmark" aria-label="Bookmark conversation" title="Bookmark conversation">☆</button>
+          <button class="icon-button" id="feedback" aria-label="Send feedback" title="Send feedback">↓</button>
+          <div class="profile">F<span></span></div>
+        </div>
+      </header>
+
+      <section class="conversation" id="conversation">
+        <div class="welcome" id="welcome">
+          <div class="welcome-orb">✦</div>
+          <p class="eyebrow">Your local intelligence partner</p>
+          <h2>What are we building<br><em>today?</em></h2>
+          <p class="welcome-copy">Fast, focused answers from your private FUTURE-50 workspace.</p>
+        </div>
+        <div class="messages" id="messages" aria-live="polite"></div>
+      </section>
+
+      <section class="composer-area">
+        <div class="suggestions" id="suggestions">
+          <button data-prompt="Explain this simply">Explain this <span>↗</span></button>
+          <button data-prompt="Show me an example">Show an example <span>↗</span></button>
+          <button data-prompt="Make it more concise">Make it concise <span>↗</span></button>
+        </div>
+        <form class="composer" id="composer">
+          <div class="composer-tools">
+            <label class="tool-button" title="Attach a file">+
+              <input type="file" id="attachment" hidden>
+            </label>
+            <span class="composer-hint" id="attachmentHint">Message FUTURE-50</span>
+            <select id="toneSelect" class="tone-select" aria-label="Response tone">
+              <option value="casual">Casual</option>
+              <option value="formal">Formal</option>
+              <option value="concise">Concise</option>
+              <option value="creative">Creative</option>
+            </select>
+            <button type="button" class="tool-button" id="mic" title="Voice input">◉</button>
+            <button type="submit" class="send-button" id="sendButton" title="Send message">↗</button>
+          </div>
+          <textarea id="messageInput" rows="2" placeholder="Ask FUTURE-50 anything..." autofocus></textarea>
+        </form>
+        <div class="notice" id="notice"><span>Help shape FUTURE-50 with a little feedback.</span><button id="startFeedback">Start now</button><button class="notice-close" id="closeNotice" aria-label="Close notice">×</button></div>
+      </section>
+    </section>
+  </main>
+  <script src="/static/app.js"></script>
+</body>
+</html>

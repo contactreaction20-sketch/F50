@@ -1,3 +1,17 @@
+Metadata-Version: 2.4
+Name: future50
+Version: 0.1.0
+Summary: FUTURE-50 Autonomous Local Personal AI Operating System
+Author: FUTURE-50 Team
+License: MIT
+Classifier: Programming Language :: Python :: 3
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Operating System :: OS Independent
+Requires-Python: >=3.10
+Description-Content-Type: text/markdown
+License-File: LICENSE
+Dynamic: license-file
+
 # FUTURE-50
 
 FUTURE-50 is a local-first, modular autonomous personal AI operating system architecture.
@@ -62,17 +76,4 @@ python -m future50
 
 ```bash
 python -m pytest
-```
-
-## Free cloud deployment
-
-The included `render.yaml` deploys the web interface as a Render free web
-service. In Render, choose **New Blueprint**, connect this repository, and
-deploy. Render will install the package with `pip install .` and provide the
-required `PORT` automatically.
-
-The service health endpoint is:
-
-```text
-/api/health
 ```
