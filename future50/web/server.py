@@ -24,7 +24,12 @@ MAX_BODY_BYTES = 64 * 1024
 
 def _provider_error(reply: str) -> bool:
     lowered = reply.lower()
-    return "provider is unavailable" in lowered or "provider inference failed" in lowered or "provider unavailable" in lowered
+    return (
+        "provider is unavailable" in lowered
+        or "provider unavailable" in lowered
+        or "inference failed" in lowered
+        or "api key is not configured" in lowered
+    )
 
 
 class ChatWebHandler(BaseHTTPRequestHandler):
