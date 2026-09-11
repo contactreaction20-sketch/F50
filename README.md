@@ -64,6 +64,25 @@ python -m future50
 python -m pytest
 ```
 
+## Personal local use
+
+GitHub stores the source code; it does not run this Python server. To use F50
+personally on Windows, clone the repository, install it, set the three
+environment variables shown in `.env.example`, and start the local web chat:
+
+```powershell
+git clone https://github.com/contactreaction20-sketch/F50.git
+cd F50
+python -m pip install .
+$env:F50_MODEL_API_URL = "https://integrate.api.nvidia.com/v1"
+$env:F50_MODEL_API_KEY = "your-new-nvidia-key"
+$env:F50_MODEL_NAME = "google/gemma-4-31b-it"
+python -m future50 --chat
+```
+
+Then open `http://127.0.0.1:8765`. Keep the API key only in your local
+environment; do not put it in `.env.example` or commit it to GitHub.
+
 ## Free cloud deployment
 
 The included `render.yaml` deploys the web interface as a Render free web
