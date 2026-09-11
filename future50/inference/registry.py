@@ -30,13 +30,13 @@ class ModelRegistry:
 
     def __init__(self):
         self.profiles = [ModelProfile(
-            name=os.getenv("F50_MODEL_NAME", "google/gemma-4-31b-it"),
-            family="NVIDIA-hosted",
-            backend="nvidia",
-            format="API",
-            quantization="managed",
-            parameters="31B",
-            context_length=32768,
+            name=os.getenv("F50_MODEL_NAME", "qwen2.5:7b-instruct-q4_K_M"),
+            family="configured",
+            backend="configured",
+            format="API or GGUF",
+            quantization="managed or q4_K_M",
+            parameters="configured",
+            context_length=8192,
             capabilities=("chat", "coding", "reasoning"),
             ram_requirement="0GB",
             vram_requirement="0GB",
