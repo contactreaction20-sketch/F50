@@ -1,2 +1,0 @@
-[console_scripts]
-future50 = future50.__main__:main
