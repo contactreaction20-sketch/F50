@@ -8,8 +8,8 @@ services:
     healthCheckPath: /api/health
     envVars:
       - key: F50_MODEL_API_URL
-        sync: false
+        value: https://openrouter.ai/api/v1
       - key: F50_MODEL_API_KEY
         sync: false
       - key: F50_MODEL_NAME
-        value: gpt-4o-mini
+        value: qwen/qwen3-32b:free

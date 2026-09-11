@@ -126,7 +126,7 @@ class LocalOllamaProvider(ModelProvider):
     def stream_generate(self, prompt: str, model: Optional[str] = None, system: Optional[str] = None):
         """Yield local model tokens as soon as Ollama produces them."""
         if self.remote_url:
-            yield self.generate(prompt, model=model, system=system)
+            yield from self._remote_stream_generate(prompt, model=model, system=system)
             return
         if self.client is None:
             yield "Local model provider is unavailable: Ollama Python client is not installed."
@@ -155,6 +155,42 @@ class LocalOllamaProvider(ModelProvider):
                     yield str(token)
         except Exception as exc:
             yield f"Local model inference failed: {exc}"
+
+    def _remote_stream_generate(self, prompt: str, model: Optional[str], system: Optional[str]):
+        if not self.remote_key:
+            yield "Remote model provider is unavailable: F50_MODEL_API_KEY is not configured."
+            return
+        payload = {
+            "model": self.remote_model,
+            "messages": [
+                {"role": "system", "content": system or self._same_language_instruction(prompt)},
+                {"role": "user", "content": prompt},
+            ],
+            "temperature": 0.25,
+            "max_tokens": 512,
+            "stream": True,
+        }
+        http_request_obj = http_request.Request(
+            f"{self.remote_url}/chat/completions",
+            data=json.dumps(payload).encode("utf-8"),
+            headers={"Content-Type": "application/json", "Authorization": f"Bearer {self.remote_key}"},
+            method="POST",
+        )
+        try:
+            with http_request.urlopen(http_request_obj, timeout=45) as response:
+                for raw_line in response:
+                    line = raw_line.decode("utf-8").strip()
+                    if not line.startswith("data:"):
+                        continue
+                    data = line[5:].strip()
+                    if data == "[DONE]":
+                        return
+                    event = json.loads(data)
+                    delta = event.get("choices", [{}])[0].get("delta", {}).get("content", "")
+                    if delta:
+                        yield str(delta)
+        except (HTTPError, URLError, TimeoutError, KeyError, IndexError, json.JSONDecodeError) as exc:
+            yield f"Remote model inference failed: {exc}"
 
     def health_check(self) -> dict[str, Any]:
         try:
