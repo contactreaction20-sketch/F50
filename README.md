@@ -93,6 +93,17 @@ $env:F50_MODEL_NAME = "qwen2.5:7b-instruct-q4_K_M"
 python -m future50 --chat
 ```
 
+For faster online inference, use the secure NVIDIA launcher after creating a
+new NVIDIA API key at https://build.nvidia.com:
+
+```powershell
+Set-ExecutionPolicy -Scope Process Bypass
+.\run_nvidia.ps1
+```
+
+The launcher reads the key as a hidden prompt and keeps it out of the source
+tree. Do not use any key previously pasted into chat; revoke those keys first.
+
 ## Free cloud deployment
 
 The included `render.yaml` deploys the web interface as a Render free web
