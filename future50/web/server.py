@@ -74,6 +74,9 @@ class ChatWebHandler(BaseHTTPRequestHandler):
             session_id = str(payload.get("session_id", "default"))[:120]
             if not message:
                 return self._json({"error": "Message is required."}, status=400)
+            provider_status = model_provider.health_check()
+            if provider_status.get("status") == "unavailable":
+                return self._json({"error": "Inference provider is unavailable.", "inference": provider_status}, status=503)
             plan = self.team.plan(message)
             model = plan.lead
             snapshot = self.context_manager.snapshot(session_id, message)
@@ -111,6 +114,9 @@ class ChatWebHandler(BaseHTTPRequestHandler):
             session_id = str(payload.get("session_id", "default"))[:120]
             if not message:
                 return self._json({"error": "Message is required."}, status=400)
+            provider_status = model_provider.health_check()
+            if provider_status.get("status") == "unavailable":
+                return self._json({"error": "Inference provider is unavailable.", "inference": provider_status}, status=503)
             plan = self.team.plan(message)
             model = plan.lead
             snapshot = self.context_manager.snapshot(session_id, message)
@@ -118,7 +124,7 @@ class ChatWebHandler(BaseHTTPRequestHandler):
             self.send_response(200)
             self.send_header("Content-Type", "text/event-stream; charset=utf-8")
             self.send_header("Cache-Control", "no-cache")
-            self.send_header("Connection", "keep-alive")
+            self.send_header("Connection", "close")
             self.send_header("X-Accel-Buffering", "no")
             self.end_headers()
             self.wfile.write(b'data: {"status": "thinking"}\n\n')
@@ -127,6 +133,11 @@ class ChatWebHandler(BaseHTTPRequestHandler):
             system = self.team.compose_system(plan, language or "Respond in the same language as the user's message.")
             response_parts = []
             for token in model_provider.stream_generate(prompt, model=model.name, system=system):
+                if _provider_error(token):
+                    self.wfile.write(f"data: {json.dumps({'error': token})}\n\n".encode("utf-8"))
+                    self.wfile.flush()
+                    self.close_connection = True
+                    return
                 response_parts.append(token)
                 self.wfile.write(f"data: {json.dumps({'token': token})}\n\n".encode("utf-8"))
                 self.wfile.flush()
