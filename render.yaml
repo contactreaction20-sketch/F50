@@ -12,4 +12,4 @@ services:
       - key: F50_MODEL_API_KEY
         sync: false
       - key: F50_MODEL_NAME
-        value: google/gemma-4-31b-it
+        value: nvidia/nemotron-3-super-120b-a12b

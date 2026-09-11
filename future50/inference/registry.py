@@ -30,7 +30,7 @@ class ModelRegistry:
 
     def __init__(self):
         self.profiles = [ModelProfile(
-            name=os.getenv("F50_MODEL_NAME", "google/gemma-4-31b-it"),
+            name=os.getenv("F50_MODEL_NAME", "nvidia/nemotron-3-super-120b-a12b"),
             family="NVIDIA-hosted",
             backend="nvidia",
             format="API",

@@ -54,7 +54,7 @@ class ModelRouter:
     """Selects a model based on task hints and hardware-aware metadata."""
 
     def __init__(self, models: list[LocalModel] | None = None):
-        configured = os.getenv("F50_MODEL_NAME", "google/gemma-4-31b-it")
+        configured = os.getenv("F50_MODEL_NAME", "nvidia/nemotron-3-super-120b-a12b")
         self.models = models or [LocalModel(configured, role) for role in ModelRole]
 
     def route(self, task: str, complexity: str = "simple") -> LocalModel:

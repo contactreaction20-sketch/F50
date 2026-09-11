@@ -33,11 +33,11 @@ class ModelProvider:
 class LocalOllamaProvider(ModelProvider):
     """OpenAI-compatible NVIDIA provider kept under the legacy class name."""
 
-    def __init__(self, model: str = "google/gemma-4-31b-it"):
+    def __init__(self, model: str = "nvidia/nemotron-3-super-120b-a12b"):
         self.model = model
         self.remote_url = os.getenv("F50_MODEL_API_URL", "https://integrate.api.nvidia.com/v1").rstrip("/")
         self.remote_key = os.getenv("F50_MODEL_API_KEY", "")
-        self.remote_model = os.getenv("F50_MODEL_NAME", "google/gemma-4-31b-it")
+        self.remote_model = os.getenv("F50_MODEL_NAME", "nvidia/nemotron-3-super-120b-a12b")
 
     def load(self) -> bool:
         return bool(self.remote_key)
@@ -63,7 +63,7 @@ class LocalOllamaProvider(ModelProvider):
                 {"role": "user", "content": prompt},
             ],
             "temperature": 0.25,
-            "max_tokens": 512,
+            "max_tokens": 1024,
         }
         body = json.dumps(payload).encode("utf-8")
         http_request_obj = http_request.Request(
@@ -94,7 +94,7 @@ class LocalOllamaProvider(ModelProvider):
                 {"role": "user", "content": prompt},
             ],
             "temperature": 0.25,
-            "max_tokens": 512,
+            "max_tokens": 1024,
             "stream": True,
         }
         http_request_obj = http_request.Request(
