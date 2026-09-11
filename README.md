@@ -83,16 +83,6 @@ python -m future50 --chat
 Then open `http://127.0.0.1:8765`. Keep the API key only in your local
 environment; do not put it in `.env.example` or commit it to GitHub.
 
-If you want completely free local use without any API key, Ollama is also
-supported. Ollama must be installed and running, then use a downloaded model:
-
-```powershell
-Remove-Item Env:F50_MODEL_API_URL -ErrorAction SilentlyContinue
-Remove-Item Env:F50_MODEL_API_KEY -ErrorAction SilentlyContinue
-$env:F50_MODEL_NAME = "qwen2.5:7b-instruct-q4_K_M"
-python -m future50 --chat
-```
-
 For faster online inference, use the secure NVIDIA launcher after creating a
 new NVIDIA API key at https://build.nvidia.com:
 

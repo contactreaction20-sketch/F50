@@ -13,12 +13,6 @@ from urllib import request as http_request
 from urllib.error import HTTPError, URLError
 from typing import Optional, Any
 
-try:
-    import ollama
-except Exception:  # pragma: no cover
-    ollama = None
-
-
 class ModelProvider:
     """Abstract local provider interface used by the app.
 
@@ -37,29 +31,16 @@ class ModelProvider:
 
 
 class LocalOllamaProvider(ModelProvider):
-    """Concrete local Ollama adapter.
+    """OpenAI-compatible NVIDIA provider kept under the legacy class name."""
 
-    Uses the installed `ollama` Python client and a default model that is
-    already present in the system registry.
-    """
-
-    def __init__(self, model: str = "qwen2.5:7b-instruct-q4_K_M"):
+    def __init__(self, model: str = "google/gemma-4-31b-it"):
         self.model = model
-        self.client = ollama.Client() if ollama is not None else None
-        self.remote_url = os.getenv("F50_MODEL_API_URL", "").rstrip("/")
+        self.remote_url = os.getenv("F50_MODEL_API_URL", "https://integrate.api.nvidia.com/v1").rstrip("/")
         self.remote_key = os.getenv("F50_MODEL_API_KEY", "")
-        self.remote_model = os.getenv("F50_MODEL_NAME", model)
+        self.remote_model = os.getenv("F50_MODEL_NAME", "google/gemma-4-31b-it")
 
     def load(self) -> bool:
-        if self.remote_url:
-            return bool(self.remote_key)
-        if self.client is None:
-            return False
-        try:
-            self.client.list()
-            return True
-        except Exception:
-            return False
+        return bool(self.remote_key)
 
     def _same_language_instruction(self, prompt: str) -> str | None:
         """Return a clean system instruction that keeps the answer in the same language as the user."""
@@ -70,32 +51,7 @@ class LocalOllamaProvider(ModelProvider):
         return "Respond in the same language as the user’s message; avoid cross-language drift."
 
     def generate(self, prompt: str, model: Optional[str] = None, system: Optional[str] = None) -> str:
-        if self.remote_url:
-            return self._remote_generate(prompt, model=model, system=system)
-        if self.client is None:
-            return "Local model provider is unavailable: Ollama Python client is not installed."
-
-        chosen = model or self.model
-        try:
-            payload = {
-                "model": chosen,
-                "prompt": prompt,
-                "stream": False,
-            }
-            same_language = self._same_language_instruction(prompt)
-            if system:
-                payload["system"] = system
-            elif same_language:
-                payload["system"] = same_language
-
-            response = self.client.generate(**payload)
-            if hasattr(response, 'response'):
-                return str(response.response).strip()
-            if isinstance(response, dict):
-                return str(response.get('response', 'No response generated.')).strip()
-            return str(response).strip()
-        except Exception as exc:
-            return f"Local model inference failed: {exc}"
+        return self._remote_generate(prompt, model=model, system=system)
 
     def _remote_generate(self, prompt: str, model: Optional[str], system: Optional[str]) -> str:
         if not self.remote_key:
@@ -124,37 +80,8 @@ class LocalOllamaProvider(ModelProvider):
             return f"Remote model inference failed: {exc}"
 
     def stream_generate(self, prompt: str, model: Optional[str] = None, system: Optional[str] = None):
-        """Yield local model tokens as soon as Ollama produces them."""
-        if self.remote_url:
-            yield from self._remote_stream_generate(prompt, model=model, system=system)
-            return
-        if self.client is None:
-            yield "Local model provider is unavailable: Ollama Python client is not installed."
-            return
-
-        chosen = model or self.model
-        try:
-            payload = {
-                "model": chosen,
-                "prompt": prompt,
-                "stream": True,
-                "keep_alive": "10m",
-                "options": {"temperature": 0.25, "num_predict": 256},
-            }
-            same_language = self._same_language_instruction(prompt)
-            if system or same_language:
-                payload["system"] = system or same_language
-            for chunk in self.client.generate(**payload):
-                if hasattr(chunk, "response"):
-                    token = chunk.response
-                elif isinstance(chunk, dict):
-                    token = chunk.get("response", "")
-                else:
-                    token = str(chunk)
-                if token:
-                    yield str(token)
-        except Exception as exc:
-            yield f"Local model inference failed: {exc}"
+        """Yield NVIDIA model tokens as soon as the online provider produces them."""
+        yield from self._remote_stream_generate(prompt, model=model, system=system)
 
     def _remote_stream_generate(self, prompt: str, model: Optional[str], system: Optional[str]):
         if not self.remote_key:
@@ -194,16 +121,11 @@ class LocalOllamaProvider(ModelProvider):
 
     def health_check(self) -> dict[str, Any]:
         try:
-            if self.remote_url:
-                if not self.remote_key:
-                    return {"status": "unavailable", "backend": "remote", "reason": "API key missing"}
-                return {"status": "configured", "backend": "remote", "model": self.remote_model}
-            if self.client is None:
-                return {"status": "unavailable", "backend": "ollama", "reason": "ollama client missing"}
-            self.client.list()
-            return {"status": "healthy", "backend": "ollama", "model": self.model}
+            if not self.remote_key:
+                return {"status": "unavailable", "backend": "nvidia", "reason": "API key missing"}
+            return {"status": "configured", "backend": "nvidia", "model": self.remote_model}
         except Exception as exc:
-            return {"status": "unavailable", "backend": "ollama", "reason": str(exc)}
+            return {"status": "unavailable", "backend": "nvidia", "reason": str(exc)}
 
 
 model_provider = LocalOllamaProvider()
